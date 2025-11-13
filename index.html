@@ -28,29 +28,27 @@ body {
   min-height: 100vh;
 }
 
-/* Encabezado */
 .header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  width: 100%;
+  justify-content: space-between;
+  width: 95%;
+  max-width: 600px;
+  margin-bottom: 0.5rem;
 }
 
 h1 {
   font-size: 1.6rem;
   color: var(--texto);
-  text-align: center;
-  margin-bottom: 0.5rem;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex:1;
+  justify-content: center;
 }
 
-/* Menú desplegable */
 .menu-btn {
-  position: absolute;
-  right: 1rem;
   background: none;
   border: none;
   font-size: 1.5rem;
@@ -61,7 +59,7 @@ h1 {
   display: none;
   position: absolute;
   top: 2.5rem;
-  right: 0.5rem;
+  left: 1rem;
   background: white;
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   border-radius: 8px;
@@ -81,7 +79,17 @@ h1 {
 }
 .menu button:hover { background: #f0f0f0; }
 
-/* Formulario */
+#btnAgregarForm {
+  background: var(--fondo);
+  color: var(--btn-agregar-color);
+  font-weight: bold;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0.2rem 0.6rem;
+}
+
 .form {
   background: #fff;
   padding: 1rem;
@@ -94,10 +102,17 @@ h1 {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
   transition: max-height 0.4s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
-  margin-bottom: 1rem;
 }
-.form.visible { max-height: 500px; opacity: 1; margin-bottom: 2rem; }
+.form.visible {
+  max-height: 500px;
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  margin-bottom: 2rem;
+}
 .form input, .form select, .form button {
   font-size:1rem; padding:0.6rem; border-radius:8px; border:1px solid #ccc;
   width:100%; box-sizing:border-box;
@@ -107,14 +122,28 @@ h1 {
 }
 .form button:hover { background:#005fcb; }
 
-.filtro {
-  width:95%; max-width:600px; margin-bottom:0.5rem;
-}
-.filtro select {
-  width:100%; padding:0.6rem; border-radius:8px; border:1px solid #ccc; font-size:1rem;
+.filtro-container {
+  display: flex;
+  align-items: center;
+  width: 95%;
+  max-width: 600px;
+  margin: 0.5rem auto 0.5rem auto;
+  gap: 0.5rem;
 }
 
-/* Tabla */
+.filtro-label {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.filtro-select {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
 table {
   width:95%; max-width:600px; border-collapse:collapse; margin-bottom:1rem; background:white; table-layout:fixed;
 }
@@ -128,7 +157,6 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 }
 .delete-btn:hover { opacity:0.7; }
 
-/* Barra inferior */
 .barra {
   position:fixed; bottom:0; left:0; width:100%;
   display:flex; background: var(--barra-bg);
@@ -142,38 +170,19 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 .barra button.activo {
   background: var(--barra-activo); color: var(--barra-texto);
 }
-#btnSeries { flex:0 0 43%; }
-#btnPeliculas { flex:0 0 43%; }
-#btnAgregarForm {
-  flex:0 0 14%; background:var(--btn-agregar-color);
-  color:#fff; font-weight:bold; font-size:1.5rem;
-}
+#btnSeries { flex:0 0 50%; }
+#btnPeliculas { flex:0 0 50%; }
 
-/* Modal mejorado */
 #modalSinopsis {
   display:none; position:fixed; top:0; left:0; width:100%; height:100%;
   background: rgba(0,0,0,0.7); align-items:center; justify-content:center;
-  z-index:2000; animation: fadeIn 0.3s ease;
+  z-index:2000;
 }
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-
 #modalSinopsis .contenido {
   background:#fff; border-radius:16px; max-width:90%; width:400px;
   max-height:80%; overflow:auto; padding:0; box-shadow:0 4px 12px rgba(0,0,0,0.3);
-  animation: slideUp 0.3s ease;
 }
-@keyframes slideUp { from {transform:translateY(20px); opacity:0;} to {transform:translateY(0); opacity:1;} }
-
-#modalSinopsis img {
-  width:100%; border-top-left-radius:16px; border-top-right-radius:16px;
-}
-#modalSinopsis .texto {
-  padding:1rem; text-align:center;
-}
-#modalSinopsis strong { font-size:1.2rem; }
-#modalSinopsis em { color:#666; font-size:0.9rem; }
-#modalSinopsis p { margin-top:0.5rem; line-height:1.4; }
-
+#modalSinopsis .texto { padding:1rem; text-align:center; }
 #cerrarModal {
   background: var(--color-primario); color:#fff; border:none;
   padding:0.5rem 1.2rem; border-radius:8px; cursor:pointer;
@@ -184,24 +193,17 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 <body>
 
 <div class="header">
-  <h1 id="tituloPrincipal"><span id="iconoTitulo">📺</span><span id="textoTitulo"> Series</span></h1>
   <button class="menu-btn" id="btnMenu">☰</button>
+  <h1 id="tituloPrincipal">
+    <span id="iconoTitulo">📺</span><span id="textoTitulo"> Series</span>
+  </h1>
+  <button id="btnAgregarForm">+</button>
+
   <div class="menu" id="menuOpciones">
     <button id="btnExportar">Exportar CSV</button>
     <button id="btnImportar">Importar CSV</button>
     <input type="file" id="inputImportar" accept=".csv" style="display:none">
   </div>
-</div>
-
-<div class="filtro">
-  <select id="filtroPlataforma">
-    <option value="todas">Todas las plataformas</option>
-    <option value="Netflix">Netflix</option>
-    <option value="Prime Video">Prime Video</option>
-    <option value="HBO Max">HBO Max</option>
-    <option value="Disney+">Disney+</option>
-    <option value="AppleTV+">AppleTV+</option>
-  </select>
 </div>
 
 <div class="form" id="formulario">
@@ -220,6 +222,13 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
   <button id="agregar">Agregar</button>
 </div>
 
+<div class="filtro-container">
+  <label for="filtroPlataforma" class="filtro-label">Filtrar:</label>
+  <select id="filtroPlataforma" class="filtro-select">
+    <option value="todas">Todas las plataformas</option>
+  </select>
+</div>
+
 <table id="tablaSeries">
   <thead><tr><th>Título</th><th>Plataforma</th><th>Acción</th></tr></thead>
   <tbody id="cuerpoSeries"></tbody>
@@ -233,7 +242,6 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 <div class="barra">
   <button id="btnSeries" class="activo">Series</button>
   <button id="btnPeliculas">Pelis</button>
-  <button id="btnAgregarForm">+</button>
 </div>
 
 <div id="modalSinopsis">
@@ -244,7 +252,6 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 </div>
 
 <script>
-// Variables
 const tipoSelect = document.getElementById('tipo');
 const tituloInput = document.getElementById('titulo');
 const plataformaSelect = document.getElementById('plataforma');
@@ -260,154 +267,158 @@ const btnSeries = document.getElementById('btnSeries');
 const btnPeliculas = document.getElementById('btnPeliculas');
 const btnAgregarForm = document.getElementById('btnAgregarForm');
 const filtroPlataforma = document.getElementById('filtroPlataforma');
-const btnMenu = document.getElementById('btnMenu');
-const menuOpciones = document.getElementById('menuOpciones');
-const btnExportar = document.getElementById('btnExportar');
-const btnImportar = document.getElementById('btnImportar');
-const inputImportar = document.getElementById('inputImportar');
-const modalSinopsis = document.getElementById('modalSinopsis');
-const textoSinopsis = document.getElementById('textoSinopsis');
-const cerrarModal = document.getElementById('cerrarModal');
 
 let series = JSON.parse(localStorage.getItem('series')) || [];
 let peliculas = JSON.parse(localStorage.getItem('peliculas')) || [];
 
-// Guardar en localStorage
+// Inicializar desplegable Tipo
+tipoSelect.value = 'series';
+
 function guardar() {
   localStorage.setItem('series', JSON.stringify(series));
   localStorage.setItem('peliculas', JSON.stringify(peliculas));
 }
 
-// Renderizar tablas
 function render(lista, cuerpo, tipo) {
+  const plataformas = Array.from(new Set(lista.map(i => i.plataforma))).sort();
+  filtroPlataforma.innerHTML = '<option value="todas">Todas las plataformas</option>';
+  plataformas.forEach(p => { filtroPlataforma.innerHTML += `<option value="${p}">${p}</option>`; });
+
   const filtro = filtroPlataforma.value;
   cuerpo.innerHTML = '';
   lista.filter(item => filtro==='todas'||item.plataforma===filtro)
        .forEach((item,index)=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td>${item.titulo}</td><td>${item.plataforma}</td><td><button class="delete-btn">🗑️</button></td>`;
+    
     tr.querySelector('.delete-btn').addEventListener('click', e=>{
       e.stopPropagation();
-      lista.splice(index,1); guardar(); render(lista,cuerpo,tipo);
+      lista.splice(index,1); guardar(); aplicarFiltro();
     });
-    tr.addEventListener('click', ()=>buscarSinopsisTMDb(item.titulo,tipo));
+
+    tr.addEventListener('click', () => {
+      const API_KEY = 'a0080a31ac38a365707cbe63be481cb0'; // Reemplazar con tu TMDb API key
+      const endpoint = tipo==='series' ? 'tv' : 'movie';
+      fetch(`https://api.themoviedb.org/3/search/${endpoint}?api_key=${API_KEY}&query=${encodeURIComponent(item.titulo)}`)
+        .then(res => res.json())
+        .then(data => {
+          if(data.results && data.results.length > 0){
+            const result = data.results[0];
+            document.getElementById('textoSinopsis').innerHTML = `<h3>${result.title || result.name}</h3><p>${result.overview}</p>`;
+          } else {
+            document.getElementById('textoSinopsis').innerHTML = `<p>No se encontró sinopsis.</p>`;
+          }
+          document.getElementById('modalSinopsis').style.display = 'flex';
+        })
+        .catch(()=> {
+          document.getElementById('textoSinopsis').innerHTML = `<p>Error al consultar la API.</p>`;
+          document.getElementById('modalSinopsis').style.display = 'flex';
+        });
+    });
+
     cuerpo.appendChild(tr);
   });
 }
 
-// Mostrar lista
-function mostrarLista(tipo){
+function aplicarFiltro() {
+  if(tablaSeries.style.display==='table') render(series,cuerpoSeries,'series');
+  else render(peliculas,cuerpoPeliculas,'peliculas');
+}
+
+function mostrarLista(tipo) {
   if(tipo==='series'){
     tablaSeries.style.display='table'; tablaPeliculas.style.display='none';
     btnSeries.classList.add('activo'); btnPeliculas.classList.remove('activo');
     iconoTitulo.textContent='📺'; textoTitulo.textContent=' Series';
+    render(series,cuerpoSeries,'series');
   } else {
     tablaSeries.style.display='none'; tablaPeliculas.style.display='table';
     btnPeliculas.classList.add('activo'); btnSeries.classList.remove('activo');
     iconoTitulo.textContent='🎞️'; textoTitulo.textContent=' Películas';
+    render(peliculas,cuerpoPeliculas,'peliculas');
   }
-  aplicarFiltro();
 }
 
-// Filtro
-function aplicarFiltro(){
-  if(tablaSeries.style.display==='table'){ render(series,cuerpoSeries,'series'); }
-  else { render(peliculas,cuerpoPeliculas,'peliculas'); }
-}
-
-// Agregar elemento
-function agregarElemento(){
+function agregarElemento() {
   const titulo = tituloInput.value.trim();
   const plataforma = plataformaSelect.value;
   const tipo = tipoSelect.value;
-  if(!titulo){ alert('Escribe un título'); return; }
+  if(!titulo) return;
   const lista = tipo==='series'?series:peliculas;
   if(!lista.some(e=>e.titulo.toLowerCase()===titulo.toLowerCase())){
     lista.push({titulo,plataforma});
   }
-  guardar(); aplicarFiltro(); mostrarLista(tipo);
+  guardar(); mostrarLista(tipo);
   tituloInput.value=''; formulario.classList.remove('visible');
 }
 
-// Eventos principales
 agregarBtn.addEventListener('click', agregarElemento);
 tituloInput.addEventListener('keydown', e=>{ if(e.key==='Enter') agregarElemento(); });
 btnSeries.addEventListener('click', ()=>{ mostrarLista('series'); formulario.classList.remove('visible'); });
 btnPeliculas.addEventListener('click', ()=>{ mostrarLista('peliculas'); formulario.classList.remove('visible'); });
-btnAgregarForm.addEventListener('click', ()=>{ tipoSelect.value=tablaPeliculas.style.display==='table'?'peliculas':'series'; formulario.classList.toggle('visible'); tituloInput.focus(); });
+
+// Botón "+" ajustando Tipo según lista activa
+btnAgregarForm.addEventListener('click', ()=>{
+  formulario.classList.toggle('visible');
+  tipoSelect.value = tablaSeries.style.display==='table' ? 'series' : 'peliculas';
+  tituloInput.focus();
+});
+
 filtroPlataforma.addEventListener('change', aplicarFiltro);
 
-// Menú CSV
-btnMenu.addEventListener('click', ()=>menuOpciones.classList.toggle('visible'));
-document.addEventListener('click', e=>{ if(!e.target.closest('.menu')&&!e.target.closest('#btnMenu')) menuOpciones.classList.remove('visible'); });
+document.getElementById('cerrarModal').addEventListener('click', ()=> {
+  document.getElementById('modalSinopsis').style.display='none';
+});
 
-btnExportar.addEventListener('click', ()=>{
-  let csv='Tipo,Título,Plataforma\n';
-  series.forEach(s=>csv+=`Serie,${s.titulo},${s.plataforma}\n`);
-  peliculas.forEach(p=>csv+=`Película,${p.titulo},${p.plataforma}\n`);
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download='watchlist.csv'; a.click(); URL.revokeObjectURL(url);
+// --- Menú CSV ---
+const btnMenu = document.getElementById('btnMenu');
+const menuOpciones = document.getElementById('menuOpciones');
+const btnExportar = document.getElementById('btnExportar');
+const btnImportar = document.getElementById('btnImportar');
+const inputImportar = document.getElementById('inputImportar');
+
+btnMenu.addEventListener('click', () => menuOpciones.classList.toggle('visible'));
+
+// Exportar ambas listas
+btnExportar.addEventListener('click', () => {
+  let csv = 'Titulo,Plataforma,Tipo\n';
+  series.forEach(e => { csv += `${e.titulo},${e.plataforma},Serie\n`; });
+  peliculas.forEach(e => { csv += `${e.titulo},${e.plataforma},Película\n`; });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'watchlist.csv';
+  a.click();
+  URL.revokeObjectURL(url);
   menuOpciones.classList.remove('visible');
 });
 
-btnImportar.addEventListener('click', ()=>inputImportar.click());
-inputImportar.addEventListener('change', e=>{
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=event=>{
-    const lines=event.target.result.split(/\r?\n/);
-    lines.slice(1).forEach(line=>{
-      const [tipo,titulo,plataforma]=line.split(',');
-      if(titulo && plataforma){
-        const cleanTitulo=titulo.trim(), cleanPlataforma=plataforma.trim();
-        if(tipo==='Serie'){ if(!series.some(s=>s.titulo.toLowerCase()===cleanTitulo.toLowerCase())) series.push({titulo:cleanTitulo,plataforma:cleanPlataforma}); }
-        else if(tipo==='Película'){ if(!peliculas.some(p=>p.titulo.toLowerCase()===cleanTitulo.toLowerCase())) peliculas.push({titulo:cleanTitulo,plataforma:cleanPlataforma}); }
+// Importar CSV
+btnImportar.addEventListener('click', () => inputImportar.click());
+inputImportar.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const lines = ev.target.result.split('\n').slice(1);
+    lines.forEach(line => {
+      const [titulo, plataforma, tipo] = line.split(',');
+      if(!titulo || !plataforma || !tipo) return;
+      const lista = tipo.trim().toLowerCase() === 'serie' ? series : peliculas;
+      if(!lista.some(e => e.titulo.toLowerCase() === titulo.trim().toLowerCase())){
+        lista.push({ titulo: titulo.trim(), plataforma: plataforma.trim() });
       }
     });
-    guardar(); aplicarFiltro(); alert('Importación completada ✅');
+    guardar();
+    aplicarFiltro();
+    inputImportar.value = '';
+    menuOpciones.classList.remove('visible');
   };
   reader.readAsText(file);
-  menuOpciones.classList.remove('visible');
 });
 
-// Modal TMDb
-cerrarModal.addEventListener('click', ()=>modalSinopsis.style.display='none');
-modalSinopsis.addEventListener('click', e=>{ if(e.target===modalSinopsis) modalSinopsis.style.display='none'; });
-
-function buscarSinopsisTMDb(titulo,tipo){
-  const apiKey='a0080a31ac38a365707cbe63be481cb0'; // Reemplaza con tu clave
-  const tipoEndpoint = tipo==='series'?'tv':'movie';
-  const searchUrl = `https://api.themoviedb.org/3/search/${tipoEndpoint}?api_key=${apiKey}&query=${encodeURIComponent(titulo)}&language=es-ES`;
-  textoSinopsis.innerHTML='<p>Cargando...</p>';
-  modalSinopsis.style.display='flex';
-
-  fetch(searchUrl)
-    .then(r=>r.json())
-    .then(data=>{
-      if(data.results && data.results.length>0){
-        const item=data.results[0];
-        const detailUrl = `https://api.themoviedb.org/3/${tipoEndpoint}/${item.id}?api_key=${apiKey}&language=es-ES`;
-        return fetch(detailUrl);
-      } else throw new Error('No encontrado');
-    })
-    .then(r2=>r2.json())
-    .then(detail=>{
-      const posterUrl = detail.poster_path?`https://image.tmdb.org/t/p/w500${detail.poster_path}`:'';
-      textoSinopsis.innerHTML = `
-        ${posterUrl?`<img src="${posterUrl}" alt="Poster">`:''}
-        <div>
-          <strong>${detail.name||detail.title}</strong><br>
-          <em>${(detail.genres||[]).map(g=>g.name).join(', ')}</em><br>
-          <p>${detail.overview||'Sin sinopsis disponible.'}</p>
-        </div>`;
-    })
-    .catch(()=>{ textoSinopsis.innerHTML='<p>Sin sinopsis disponible.</p>'; });
-}
-
-// Inicialización
-aplicarFiltro();
 mostrarLista('series');
 </script>
 </body>
