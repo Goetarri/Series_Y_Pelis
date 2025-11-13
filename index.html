@@ -1,819 +1,338 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Series y Pelis para ver</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Fuente Inter para mejor legibilidad */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Gris claro de fondo */
-        }
-        /* La altura se ajusta para dejar espacio al formulario y al footer */
-        .scrollable-list {
-            max-height: 65vh; 
-            overflow-y: auto;
-        }
-        /* Clase para el icono de plataforma */
-        .platform-icon {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            border-radius: 9999px; /* Full circle */
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Watchlist</title>
+<style>
+:root {
+  --color-primario: #0077ff;
+  --color-borrar: #ff4444;
+  --fondo: #f5f5f5;
+  --texto: #222;
+  --barra-bg: #eee;
+  --barra-activo: #0077ff;
+  --barra-texto: #fff;
+  --barra-inactivo: #aaa;
+  --btn-agregar-color: #28a745;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--fondo);
+  margin: 0;
+  padding: 1rem 0 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+h1 {
+  font-size: 1.6rem;
+  color: var(--texto);
+  text-align: center;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-btn {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.menu {
+  display: none;
+  position: absolute;
+  top: 2.5rem;
+  right: 0.5rem;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+}
+.menu.visible { display: block; }
+.menu button {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.menu button:hover { background: #f0f0f0; }
+
+.form {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
+  margin-bottom: 1rem;
+}
+.form.visible { max-height: 500px; opacity: 1; margin-bottom: 2rem; }
+.form input, .form select, .form button { font-size:1rem; padding:0.6rem; border-radius:8px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
+.form button { background: var(--color-primario); color:#fff; border:none; cursor:pointer; }
+.form button:hover { background:#005fcb; }
+
+.filtro { width:95%; max-width:600px; margin-bottom:0.5rem; }
+.filtro select { width:100%; padding:0.6rem; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+
+table { width:95%; max-width:600px; border-collapse:collapse; margin-bottom:1rem; background:white; table-layout:fixed; }
+thead { background: var(--color-primario); color:white; }
+th, td { padding:0.75rem; text-align:left; word-wrap:break-word; }
+tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
+
+.delete-btn { background:none; border:none; color:var(--color-borrar); font-size:1.1rem; cursor:pointer; padding:0.2rem 0.4rem; }
+.delete-btn:hover { opacity:0.7; }
+
+.barra { position:fixed; bottom:0; left:0; width:100%; display:flex; background: var(--barra-bg); height:3.5rem; box-shadow:0 -2px 6px rgba(0,0,0,0.1); }
+.barra button { margin:0; border-radius:0; background: var(--barra-inactivo); color:#fff; border:none; cursor:pointer; height:100%; font-size:1.1rem; font-weight:bold; }
+.barra button.activo { background: var(--barra-activo); color: var(--barra-texto); }
+#btnSeries { flex:0 0 43%; } #btnPeliculas { flex:0 0 43%; }
+#btnAgregarForm { flex:0 0 14%; background:var(--btn-agregar-color); color:#fff; font-weight:bold; font-size:1.5rem; }
+
+#modalSinopsis { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2000; }
+#modalSinopsis .contenido { background:#fff; padding:1rem; border-radius:12px; max-width:90%; max-height:80%; overflow:auto; }
+#modalSinopsis button { margin-top:1rem; background:var(--color-primario); color:#fff; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; }
+</style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-    <main class="flex-grow container mx-auto p-4 md:p-8">
-
-        <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-lg mb-8">
-            <div class="flex justify-between items-center mb-4 relative">
-                <h1 class="text-2xl font-bold text-gray-800">Series y Pelis para ver</h1>
-                
-                <div class="relative inline-block text-left">
-                    <button id="optionsButton" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition duration-150 focus:outline-none">
-                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                    </button>
-
-                    <div id="optionsMenu" class="dropdown-menu origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                        <div class="py-1" role="none">
-                            
-                            <!-- Importar CSV -->
-                            <input type="file" id="csvFileInput" accept=".csv" class="hidden" />
-                            <button id="importCsvButton" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
-                                Importar CSV
-                            </button>
-                            <!-- FIN NUEVA OPCIÓN -->
-
-                            <button id="exportCsvButton" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
-                                Exportar CSV
-                            </button>
-                            <button id="resendButton" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
-                                Reenviar
-                            </button>
-                            
-                            <hr class="my-1 border-gray-200">
-                            <button id="deleteSeriesButton" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem">
-                                Borrar todas las Series
-                            </button>
-                            <button id="deleteMoviesButton" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" role="menuitem">
-                                Borrar todas las Películas
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <form id="addItemForm" class="space-y-4">
-
-                <div>
-                    <label for="type" class="block text-sm font-medium text-gray-700">Tipo</label>
-                    <select id="type" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm">
-                        <option value="Serie">Serie</option>
-                        <option value="Pelicula">Película</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700">Título</label>
-                    <input type="text" id="title" required placeholder="Ej: Dune o The Last of Us" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                </div>
-
-                <div>
-                    <label for="platform" class="block text-sm font-medium text-gray-700">Plataforma</label>
-                    <select id="platform" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm">
-                        <option value="Netflix">Netflix</option>
-                        <option value="Prime">Prime</option>
-                        <option value="Apple TV+">Apple TV+</option>
-                        <option value="HBO Max">HBO Max</option>
-                        <option value="Disney+">Disney+</option>
-                        <option value="M+">M+</option> 
-                        <option value="Filmin">Filmin</option> 
-                        <option value="Hulu">Hulu</option> 
-                        <option value="Paramount+">Paramount+</option> 
-                    </select>
-                </div>
-
-                <button type="submit" id="submitButton" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-                    Agregar a la Lista
-                </button>
-                <p id="statusMessage" class="text-center text-sm hidden mt-2 text-indigo-600">Guardando localmente...</p>
-            </form>
-        </div>
-
-        <div id="listContainer" class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-lg mt-8">
-            <h2 id="listTitle" class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                Series Pendientes
-                <span id="listIcon">
-                    <svg class="w-5 h-5 ml-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1v-3.25m-7.25 0h14.5a.75.75 0 00.75-.75V8.5a.75.75 0 00-.75-.75h-14.5a.75.75 0 00-.75.75V16.25a.75.75 0 00.75.75z"></path></svg>
-                </span>
-            </h2>
-            <div id="listItems" class="scrollable-list space-y-3">
-                </div>
-        </div>
-
-    </main>
-
-    <footer class="sticky bottom-0 w-full bg-white border-t border-gray-200 shadow-xl p-3">
-        <div class="flex justify-around space-x-2 max-w-sm mx-auto">
-            
-            <button id="btnSeries" class="w-1/2 flex items-center justify-center py-2 px-2 rounded-lg text-sm font-medium text-white bg-indigo-600 transition duration-150 ease-in-out">
-                Series
-            </button>
-            <button id="btnMovies" class="w-1/2 flex items-center justify-center py-2 px-2 rounded-lg text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 transition duration-150 ease-in-out">
-                Pelis
-            </button>
-        </div>
-    </footer>
-
-    <div id="synopsisModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
-        </div>
-    
-    <!-- Modal de Confirmación personalizado para Importar CSV -->
-    <div id="importModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden p-4">
-        <div class="bg-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative">
-            <h3 class="text-xl font-bold mb-3 text-gray-800">Confirmar Importación</h3>
-            <p class="text-gray-700 mb-4">¿Quieres **reemplazar** la lista actual con los datos del archivo, o **añadir** los nuevos elementos a la lista existente?</p>
-            <div class="flex justify-end space-x-3">
-                <button id="cancelImportBtn" class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150">
-                    Cancelar
-                </button>
-                <button id="appendImportBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition duration-150">
-                    Añadir (Combinar)
-                </button>
-                <button id="replaceImportBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-150">
-                    Reemplazar
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <script>
-        // Variables DOM y Estado
-        let currentView = 'Serie'; 
-        const STORAGE_KEY = 'watchlistData';
-        
-        // =========================================================
-        // ⚠️ REEMPLAZA ESTA CLAVE CON TU CLAVE REAL DE OMDB
-        const OMDB_API_KEY = 'c15dd5de'; 
-        // =========================================================
-
-        const listItemsEl = document.getElementById('listItems');
-        const listTitleEl = document.getElementById('listTitle');
-        const listIconEl = document.getElementById('listIcon');
-        const statusMessage = document.getElementById('statusMessage');
-        const titleInput = document.getElementById('title'); 
-        const synopsisModal = document.getElementById('synopsisModal'); 
-        const importModal = document.getElementById('importModal'); // Nuevo Modal
-
-
-        // --- CONFIGURACIÓN DE ICONOS DE PLATAFORMA ---
-
-        /**
-         * Retorna la configuración de color y texto (iniciales) para el icono de la plataforma.
-         * Se usan colores distintivos de cada servicio.
-         */
-        function getPlatformIconConfig(platform) {
-            switch (platform) {
-                case 'Netflix': return { text: 'N', color: 'bg-red-600 text-white' };
-                case 'Prime': return { text: 'P', color: 'bg-blue-600 text-white' };
-                case 'Apple TV+': return { text: 'A+', color: 'bg-gray-800 text-white text-[10px]' }; // Fuente más pequeña para A+
-                case 'HBO Max': return { text: 'H', color: 'bg-purple-700 text-white' };
-                case 'Disney+': return { text: 'D+', color: 'bg-indigo-600 text-white text-[10px]' }; // Fuente más pequeña para D+
-                case 'M+': return { text: 'M', color: 'bg-yellow-500 text-gray-900' };
-                case 'Filmin': return { text: 'F', color: 'bg-cyan-600 text-white' };
-                case 'Hulu': return { text: 'H', color: 'bg-green-600 text-white' };
-                case 'Paramount+': return { text: 'P+', color: 'bg-sky-700 text-white text-[10px]' }; // Fuente más pequeña para P+
-                default: return { text: '?', color: 'bg-gray-400 text-white' };
-            }
-        }
-
-        /**
-         * Genera el HTML para el icono de la plataforma.
-         */
-        function renderPlatformIcon(platform) {
-            const config = getPlatformIconConfig(platform);
-            return `
-                <div class="platform-icon ${config.color} hover:shadow-lg transition duration-150" 
-                     title="${platform}" 
-                     aria-label="Plataforma: ${platform}">
-                    ${config.text}
-                </div>
-            `;
-        }
-        
-        // --- Funciones de Persistencia (LocalStorage) y Status ---
-        
-        function loadItems() {
-            try {
-                const json = localStorage.getItem(STORAGE_KEY);
-                return json ? JSON.parse(json) : [];
-            } catch (error) {
-                console.error("Error al cargar datos de localStorage:", error);
-                return [];
-            }
-        }
-
-        function saveItems(items) {
-            try {
-                // Eliminar duplicados antes de guardar (mismo título y tipo)
-                const uniqueItems = items.reduce((acc, current) => {
-                    // Check for existence, case-insensitive title check
-                    const x = acc.find(item => item.title.toLowerCase() === current.title.toLowerCase() && item.type === current.type);
-                    if (!x) {
-                        return acc.concat([current]);
-                    }
-                    return acc;
-                }, []);
-
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(uniqueItems));
-                renderLists(uniqueItems); 
-            } catch (error) {
-                console.error("Error al guardar datos en localStorage:", error);
-                showStatus('Error: No se pudo guardar la lista localmente.', 'text-red-500');
-            }
-        }
-
-        function showStatus(message, colorClass, duration = 3000) {
-            statusMessage.textContent = message;
-            statusMessage.className = `text-center text-sm mt-2 ${colorClass}`;
-            statusMessage.classList.remove('hidden');
-
-            setTimeout(() => {
-                statusMessage.classList.add('hidden');
-            }, duration);
-        }
-
-        // --- Funcionalidad de SINOPSIS (Implementación OMDB) ---
-        
-        async function fetchAndDisplaySynopsis(item) {
-            // Mapping internal type to OMDB type
-            const omdbType = item.type === 'Serie' ? 'series' : 'movie';
-            
-            // Reemplazar espacios por '+' para la URL y codificar
-            const searchTitle = encodeURIComponent(item.title.trim());
-
-            const API_URL = `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&t=${searchTitle}&type=${omdbType}&plot=full&r=json`;
-
-            // Mostrar estado de carga
-            synopsisModal.innerHTML = `
-                <div class="bg-white p-6 rounded-lg max-w-lg w-full shadow-2xl relative">
-                    <h3 class="text-xl font-bold mb-3 text-gray-800">${item.title} (${item.type})</h3>
-                    <p class="text-gray-600">Buscando sinopsis en OMDB... por favor, espere. 🔍</p>
-                    <button onclick="document.getElementById('synopsisModal').classList.add('hidden')" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition duration-150" aria-label="Cerrar">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            `;
-            synopsisModal.classList.remove('hidden');
-
-            let synopsisData = null;
-            let synopsisText = "Sinopsis no encontrada. Asegúrate de tener tu API Key de OMDB configurada y que el título sea correcto.";
-
-            if (OMDB_API_KEY === 'YOUR_OMDB_API_KEY') {
-                synopsisText = `⚠️ **ERROR de Configuración:** Por favor, reemplaza \`YOUR_OMDB_API_KEY\` en el código con tu clave real de OMDB para que la búsqueda funcione. El título buscado fue: **${item.title}**`;
-            } else {
-                try {
-                    const response = await fetch(API_URL);
-                    const data = await response.json();
-
-                    if (data.Response === "True") {
-                        synopsisData = data;
-                        synopsisText = data.Plot && data.Plot !== "N/A" ? data.Plot : "No hay sinopsis disponible para este título.";
-                    } else {
-                         // Manejar caso donde Response es "False" (ej. título no encontrado)
-                        synopsisText = `Sinopsis no encontrada para "${item.title}". Razón: ${data.Error || 'Título no encontrado o error desconocido.'}`;
-                    }
-
-                } catch (error) {
-                    console.error("Error fetching synopsis from OMDB:", error);
-                    synopsisText = "Error de conexión al buscar la sinopsis. Inténtalo de nuevo.";
-                }
-            }
-
-
-            // Renderizar el contenido final
-            synopsisModal.innerHTML = `
-                <div class="bg-white p-6 rounded-lg max-w-lg w-full shadow-2xl relative max-h-[80vh] overflow-y-auto">
-                    <h3 class="text-2xl font-bold mb-3 text-gray-800">${item.title}</h3>
-                    
-                    <p class="text-sm text-gray-600 mb-4">
-                        ${item.type} | Plataforma: **${item.platform}**
-                        ${synopsisData && synopsisData.Year && synopsisData.Year !== "N/A" ? `| Año: **${synopsisData.Year}**` : ''}
-                        ${synopsisData && synopsisData.imdbRating && synopsisData.imdbRating !== "N/A" ? `| IMDb: **${synopsisData.imdbRating}**` : ''}
-                    </p>
-                    
-                    <p class="text-gray-700 leading-relaxed text-base">${synopsisText}</p>
-
-                    ${synopsisData && synopsisData.Director && synopsisData.Director !== "N/A" ? 
-                        `<p class="mt-3 text-sm text-gray-800 font-semibold">Director(es): <span class="font-normal text-gray-600">${synopsisData.Director}</span></p>` 
-                        : ''}
-
-                    ${synopsisData && synopsisData.Actors && synopsisData.Actors !== "N/A" ? 
-                        `<p class="mt-1 text-sm text-gray-800 font-semibold">Reparto Principal: <span class="font-normal text-gray-600">${synopsisData.Actors}</span></p>` 
-                        : ''}
-                    
-                    <button onclick="document.getElementById('synopsisModal').classList.add('hidden')" class="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition duration-150" aria-label="Cerrar">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
-                </div>
-            `;
-        }
-
-        // --- Funciones de Eliminación y Borrado Masivo ---
-
-        function deleteItem(itemTitle, itemType) {
-            const currentItems = loadItems();
-            
-            const updatedItems = currentItems.filter(item => 
-                !(item.title === itemTitle && item.type === itemType)
-            );
-
-            saveItems(updatedItems);
-        }
-        
-        function clearListByType(type) {
-            document.getElementById('optionsMenu').classList.add('hidden');
-
-            // Usamos el modal de sinopsis como confirmación, aunque no es su uso principal
-            const typeDisplay = type === 'Serie' ? 'series' : 'películas';
-
-            // Usar confirmación con modal personalizado (por la restricción de alert/confirm)
-            const confirmationModal = document.getElementById('synopsisModal');
-            confirmationModal.innerHTML = `
-                <div class="bg-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative">
-                    <h3 class="text-xl font-bold mb-3 text-red-600">Confirmación Requerida</h3>
-                    <p class="text-gray-700 mb-4">¿Estás seguro de que quieres borrar TODA la lista de ${typeDisplay}? Esta acción no se puede deshacer.</p>
-                    <div class="flex justify-end space-x-3">
-                        <button id="cancelDeleteBtn" class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150">
-                            Cancelar
-                        </button>
-                        <button id="confirmDeleteBtn" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-150">
-                            Borrar Definitivamente
-                        </button>
-                    </div>
-                </div>
-            `;
-            confirmationModal.classList.remove('hidden');
-
-            document.getElementById('cancelDeleteBtn').onclick = () => confirmationModal.classList.add('hidden');
-            document.getElementById('confirmDeleteBtn').onclick = () => {
-                confirmationModal.classList.add('hidden');
-                
-                const currentItems = loadItems();
-                const updatedItems = currentItems.filter(item => item.type !== type);
-                
-                if (updatedItems.length < currentItems.length) {
-                    saveItems(updatedItems);
-                    showStatus(`🗑️ Lista de ${typeDisplay} borrada.`, 'text-red-600');
-                } else {
-                    showStatus(`La lista de ${typeDisplay} ya está vacía.`, 'text-gray-500');
-                }
-                
-                setView(currentView);
-            };
-        }
-        
-        // --- Funciones de Importación, Exportación y UI ---
-
-        // Función de Importación CSV: Convierte el string CSV a un array de objetos.
-        function csvToArray(csvString) {
-            const lines = csvString.split('\n').filter(line => line.trim() !== '');
-            if (lines.length === 0) return [];
-
-            // El formato esperado es: Tipo,Título,Plataforma
-            const data = [];
-            // Lista de plataformas permitidas (para validación básica)
-            const platforms = ["Netflix", "Prime", "Apple TV+", "HBO Max", "Disney+", "M+", "Filmin", "Hulu", "Paramount+"];
-
-            for (let i = 1; i < lines.length; i++) { // Empieza en 1 para saltar el encabezado
-                const line = lines[i].trim();
-                if (!line) continue;
-
-                // Intento de parseo simple que soporta comas dentro del título si está entre comillas.
-                // Usamos un regex para intentar capturar los tres campos
-                const match = line.match(/(?:\"([^\"]*)\"|([^\,]*))\,(?:\"([^\"]*)\"|([^\,]*))\,(?:\"([^\"]*)\"|([^\,]*))(?:\,|$)/);
-                
-                let itemType, itemTitle, itemPlatform;
-
-                if (match) {
-                    // Los grupos (1, 3, 5) son para valores entre comillas; (2, 4, 6) para valores sin comillas
-                    itemType = (match[1] || match[2] || '').trim();
-                    itemTitle = (match[3] || match[4] || '').trim();
-                    itemPlatform = (match[5] || match[6] || '').trim();
-                } else {
-                     // Fallback a split simple si el regex falla (ej. si no hay comas)
-                    const parts = line.split(',').map(p => p.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-                    if (parts.length < 3) continue;
-                    itemType = parts[0];
-                    itemTitle = parts[1];
-                    itemPlatform = parts[2];
-                }
-                
-                // Limpiar comillas externas y dobles comillas escapadas del título
-                itemTitle = itemTitle.replace(/^"|"$/g, '').replace(/""/g, '"');
-
-
-                // Validar datos mínimos y tipo
-                if (['Serie', 'Pelicula'].includes(itemType) && itemTitle && platforms.includes(itemPlatform)) {
-                    data.push({
-                        type: itemType,
-                        title: itemTitle,
-                        platform: itemPlatform
-                    });
-                } else {
-                    console.warn(`Fila omitida por formato o datos inválidos: ${line}`);
-                }
-            }
-            return data;
-        }
-
-        // Función que ejecuta la lógica de importación con el modo elegido
-        function handleFileImport(content, mode) {
-            document.getElementById('optionsMenu').classList.add('hidden');
-            importModal.classList.add('hidden');
-            
-            const importedItems = csvToArray(content);
-
-            if (importedItems.length === 0) {
-                showStatus('❌ Error al importar: El archivo no contiene datos válidos o está vacío.', 'text-red-600', 5000);
-                return;
-            }
-
-            let finalItems = [];
-            let itemsAdded = 0;
-
-            if (mode === 'replace') {
-                finalItems = importedItems;
-                itemsAdded = importedItems.length;
-            } else { // mode === 'append' (Añadir/Combinar)
-                const currentItems = loadItems();
-                
-                // Función para comprobar duplicados (título insensible a mayúsculas/minúsculas, mismo tipo)
-                const isDuplicate = (newItem) => currentItems.some(item => 
-                    item.title.toLowerCase() === newItem.title.toLowerCase() && item.type === newItem.type
-                );
-
-                const newItemsToAdd = importedItems.filter(newItem => !isDuplicate(newItem));
-                finalItems = [...currentItems, ...newItemsToAdd];
-                itemsAdded = newItemsToAdd.length;
-            }
-
-            // Guardamos la lista final (la función saveItems ya aplica el filtro de duplicados final)
-            saveItems(finalItems);
-            
-            if (itemsAdded > 0) {
-                 showStatus(`🎉 Importación exitosa. ${itemsAdded} elementos nuevos añadidos.`, 'text-green-600', 4000);
-            } else if (mode === 'replace') {
-                showStatus(`🎉 Importación exitosa. ${importedItems.length} elementos reemplazados.`, 'text-green-600', 4000);
-            } else {
-                showStatus('ℹ️ Archivo importado, pero no se añadieron elementos nuevos (posibles duplicados).', 'text-gray-500', 4000);
-            }
-            
-            // Forzar actualización de la vista actual
-            setView(currentView);
-        }
-
-        // Función que lee el archivo CSV y activa el modal de modo
-        function importFromCSV(file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const content = event.target.result;
-                
-                // Abrir el modal de confirmación de modo
-                importModal.classList.remove('hidden');
-
-                // Listener para el botón Cancelar
-                document.getElementById('cancelImportBtn').onclick = () => {
-                    importModal.classList.add('hidden');
-                    showStatus('Importación cancelada.', 'text-gray-500', 2000);
-                };
-
-                // Listener para el botón Reemplazar
-                document.getElementById('replaceImportBtn').onclick = () => {
-                    handleFileImport(content, 'replace');
-                };
-
-                // Listener para el botón Añadir (Combinar)
-                document.getElementById('appendImportBtn').onclick = () => {
-                    handleFileImport(content, 'append');
-                };
-            };
-
-            reader.onerror = function() {
-                importModal.classList.add('hidden');
-                showStatus('❌ Error al leer el archivo.', 'text-red-600', 3000);
-            };
-
-            reader.readAsText(file);
-        }
-
-        // Función de exportación
-        function itemsToCSVString(dataArray, includeHeader = true) {
-            if (dataArray.length === 0) return includeHeader ? ['Tipo', 'Título', 'Plataforma'].join(',') + '\n' : '';
-            
-            const header = ['Tipo', 'Título', 'Plataforma'];
-            const csvRows = [];
-            
-            if (includeHeader) {
-                csvRows.push(header.join(','));
-            }
-
-            for (const item of dataArray) {
-                // Encerrar el título y plataforma entre comillas y escapar comillas dobles internas
-                const title = `"${item.title.replace(/"/g, '""')}"`; 
-                const platform = `"${item.platform.replace(/"/g, '""')}"`;
-                const row = [item.type, title, platform];
-                csvRows.push(row.join(','));
-            }
-
-            return csvRows.join('\n');
-        }
-
-        function downloadFile(csvString, filename) {
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            
-            const link = document.createElement("a");
-            if (link.download !== undefined) { 
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", filename);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }
-        }
-
-        function exportToCSV() {
-            const currentItems = loadItems();
-            
-            if (currentItems.length === 0) {
-                showStatus('No hay elementos para exportar.', 'text-gray-500');
-                document.getElementById('optionsMenu').classList.add('hidden');
-                return;
-            }
-
-            const csvString = itemsToCSVString(currentItems, true);
-            downloadFile(csvString, 'Series y Pelis.csv');
-            document.getElementById('optionsMenu').classList.add('hidden');
-            showStatus('Exportando lista a Series y Pelis.csv...', 'text-indigo-600', 2000);
-        }
-
-        function resendList() {
-            document.getElementById('optionsMenu').classList.add('hidden');
-
-            const currentItems = loadItems();
-            const series = currentItems.filter(item => item.type === 'Serie');
-            const movies = currentItems.filter(item => item.type === 'Pelicula');
-
-            const MAX_TITLE_LENGTH = 30;
-
-            const formatTable = (data, headerText) => {
-                let table = `${headerText}\n`;
-                const separator = "=".repeat(headerText.length) + "\n";
-                table += separator;
-                table += "Título".padEnd(MAX_TITLE_LENGTH) + "Plataforma\n";
-                table += "-".repeat(MAX_TITLE_LENGTH) + "--------------------\n";
-
-                if (data.length === 0) {
-                    table += "No hay elementos en esta lista.\n";
-                } else {
-                    data.forEach(item => {
-                        const title = item.title.substring(0, MAX_TITLE_LENGTH).padEnd(MAX_TITLE_LENGTH);
-                        table += `${title}${item.platform}\n`;
-                    });
-                }
-                return table;
-            };
-
-            const seriesTable = formatTable(series, "SERIES PENDIENTES");
-            const moviesTable = formatTable(movies, "PELÍCULAS PENDIENTES");
-
-            let mailBody = seriesTable + "\n\n" + moviesTable;
-
-            const subject = encodeURIComponent("Mi Lista de Seguimiento: Series y Películas");
-            const body = encodeURIComponent(mailBody).replace(/%0A/g, '%0D%0A');
-
-            const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-            
-            window.location.href = mailtoLink;
-        }
-
-        function setView(view) {
-            currentView = view;
-            const items = loadItems();
-            renderLists(items);
-
-            const buttons = {
-                'Serie': document.getElementById('btnSeries'),
-                'Pelicula': document.getElementById('btnMovies')
-            };
-
-            Object.entries(buttons).forEach(([key, button]) => {
-                const isActive = key === view;
-                button.classList.toggle('bg-indigo-600', isActive);
-                button.classList.toggle('text-white', isActive);
-                button.classList.toggle('bg-gray-200', !isActive);
-                button.classList.toggle('text-gray-700', !isActive);
-            });
-        }
-
-        // FUNCIÓN RENDERIZADO DE ÍTEM
-        function renderItem(item) {
-            
-            const itemEl = document.createElement('div');
-            itemEl.dataset.title = item.title;
-            itemEl.dataset.type = item.type;
-            
-            // Flexbox layout para el ítem de la lista.
-            itemEl.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg shadow-sm border-l-4 border-indigo-400 cursor-pointer hover:bg-gray-100 transition duration-150';
-
-            // ATENCIÓN AL CAMBIO:
-            // 1. Eliminamos 'min-w-0' del div contenedor para que ocupe todo el espacio libre.
-            // 2. Usamos 'flex-grow' en el contenedor del título para que sea flexible y tome el ancho restante.
-            // 3. El div del título ahora solo tiene 'mr-2' (margen derecho reducido) y 'min-w-0' para permitir que el 'truncate' funcione correctamente.
-            // 4. Los iconos (plataforma y eliminar) están en un contenedor compacto a la derecha ('flex-shrink-0' si fuera necesario, pero por defecto funciona)
-            itemEl.innerHTML = `
-                <div class="flex-grow mr-2 min-w-0"> 
-                    <p class="text-base font-semibold text-gray-800 truncate">${item.title}</p>
-                </div>
-                <div class="flex items-center space-x-2 flex-shrink-0">
-                    <!-- ICONO DE PLATAFORMA (NUEVO) -->
-                    ${renderPlatformIcon(item.platform)}
-                    <!-- FIN ICONO -->
-
-                    <button class="delete-btn p-1 bg-red-100 rounded-full text-red-600 hover:bg-red-200 transition duration-150" 
-                            data-title="${item.title}" data-type="${item.type}" aria-label="Eliminar ${item.title}" onclick="event.stopPropagation()">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            `;
-            
-            // Añadido el listener de clic para la sinopsis
-            itemEl.addEventListener('click', () => {
-                fetchAndDisplaySynopsis(item);
-            });
-
-            itemEl.querySelector('.delete-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                const title = e.currentTarget.dataset.title;
-                const type = e.currentTarget.dataset.type;
-                deleteItem(title, type);
-            });
-            
-            return itemEl;
-        }
-
-        function renderLists(allListItems) {
-            let filteredItems = [];
-            let title = '';
-            let iconSvg = '';
-
-            switch (currentView) {
-                case 'Serie':
-                    filteredItems = allListItems.filter(item => item.type === 'Serie');
-                    title = 'Series Pendientes';
-                    iconSvg = `<svg class="w-5 h-5 ml-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1v-3.25m-7.25 0h14.5a.75.75 0 00.75-.75V8.5a.75.75 0 00-.75-.75h-14.5a.75.75 0 00-.75.75V16.25a.75.75 0 00.75.75z"></path></svg>`;
-                    break;
-                case 'Pelicula':
-                    filteredItems = allListItems.filter(item => item.type === 'Pelicula');
-                    title = 'Películas Pendientes';
-                    iconSvg = `<svg class="w-5 h-5 ml-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.878v4.244a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
-                    break;
-            }
-
-            listTitleEl.textContent = title;
-            listIconEl.innerHTML = iconSvg;
-
-            listItemsEl.innerHTML = '';
-            const typeDisplay = currentView === 'Serie' ? 'series' : 'películas';
-            if (filteredItems.length === 0) {
-                listItemsEl.innerHTML = `<p class="text-gray-500 text-sm italic empty-state">No hay ${typeDisplay} en la lista.</p>`;
-            } else {
-                filteredItems.forEach(item => listItemsEl.appendChild(renderItem(item)));
-            }
-        }
-
-        // --- Inicialización y Eventos ---
-
-        document.getElementById('addItemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const type = document.getElementById('type').value;
-            const title = titleInput.value.trim(); 
-            const platform = document.getElementById('platform').value;
-
-            if (!title) return;
-
-            const currentItems = loadItems();
-
-            // COMPROBACIÓN DE DUPLICADOS (Insensible a mayúsculas/minúsculas)
-            const isDuplicate = currentItems.some(item => 
-                item.title.toLowerCase() === title.toLowerCase() && item.type === type
-            );
-
-            if (isDuplicate) {
-                showStatus(`❌ ¡Esa ${type} ya está en la lista!`, 'text-red-500');
-                titleInput.focus();
-                return;
-            }
-
-            // Si no es duplicado, procede a guardar
-            const newItem = {
-                type: type,
-                title: title,
-                platform: platform,
-            };
-            
-            currentItems.push(newItem);
-            saveItems(currentItems);
-
-            titleInput.value = '';
-            
-            showStatus('✅ Elemento añadido y guardado localmente.', 'text-green-600', 2000);
-            setView(type);
-        });
-        
-        // Asignar listeners a los botones del footer (Series, Películas)
-        document.getElementById('btnSeries').addEventListener('click', () => setView('Serie'));
-        document.getElementById('btnMovies').addEventListener('click', () => setView('Pelicula'));
-        
-        // Control del menú desplegable
-        const optionsButton = document.getElementById('optionsButton');
-        const optionsMenu = document.getElementById('optionsMenu');
-        // Elemento input:file oculto
-        const csvFileInput = document.getElementById('csvFileInput');
-
-        optionsButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            optionsMenu.classList.toggle('hidden');
-        });
-
-        // Cierra el menú si se hace clic fuera
-        document.addEventListener('click', (e) => {
-            if (!optionsButton.contains(e.target) && !optionsMenu.contains(e.target)) {
-                optionsMenu.classList.add('hidden');
-            }
-        });
-
-        // Eventos de opciones (Importar, Exportar, Reenviar)
-        
-        // 1. IMPORTAR CSV: Al hacer clic en el botón del menú, se activa el input:file oculto
-        document.getElementById('importCsvButton').addEventListener('click', () => {
-            document.getElementById('optionsMenu').classList.add('hidden');
-            csvFileInput.click();
-        });
-
-        // 2. IMPORTAR CSV: Al seleccionar un archivo, se llama a la función de importación
-        csvFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                importFromCSV(file);
-            }
-            // Resetear el valor para que el mismo archivo pueda ser cargado de nuevo
-            e.target.value = null; 
-        });
-
-        document.getElementById('exportCsvButton').addEventListener('click', exportToCSV);
-        document.getElementById('resendButton').addEventListener('click', resendList);
-        
-        // LISTENERS para el borrado por tipo
-        document.getElementById('deleteSeriesButton').addEventListener('click', () => clearListByType('Serie'));
-        document.getElementById('deleteMoviesButton').addEventListener('click', () => clearListByType('Pelicula'));
-
-
-        // Cargar y Renderizar al inicio
-        window.addEventListener('load', () => {
-            // Cargar datos de prueba iniciales para la demostración si la lista está vacía
-            const initialItems = loadItems();
-            if (initialItems.length === 0) {
-                saveItems([
-                    { type: 'Serie', title: 'The Last of Us', platform: 'HBO Max' },
-                    { type: 'Pelicula', title: 'Dune', platform: 'HBO Max' },
-                    { type: 'Serie', title: 'Arcane', platform: 'Netflix' },
-                    { type: 'Pelicula', title: 'Poor Things', platform: 'Disney+' },
-                    { type: 'Serie', title: 'Slow Horses', platform: 'Apple TV+' },
-                    { type: 'Pelicula', title: 'Interstellar', platform: 'Prime' },
-                    { type: 'Serie', title: 'The Lord of the Rings: The Rings of Power', platform: 'Prime' },
-                ]);
-            }
-            setView('Serie');
-        });
-    </script>
+<body>
+
+<div class="header">
+  <h1 id="tituloPrincipal"><span id="iconoTitulo">📺</span><span id="textoTitulo"> Series</span></h1>
+  <button class="menu-btn" id="btnMenu">☰</button>
+  <div class="menu" id="menuOpciones">
+    <button id="btnExportar">Exportar CSV</button>
+    <button id="btnImportar">Importar CSV</button>
+    <input type="file" id="inputImportar" accept=".csv" style="display:none">
+  </div>
+</div>
+
+<div class="filtro">
+  <select id="filtroPlataforma">
+    <option value="todas">Todas las plataformas</option>
+    <option value="Netflix">Netflix</option>
+    <option value="Prime Video">Prime Video</option>
+    <option value="HBO Max">HBO Max</option>
+    <option value="Disney+">Disney+</option>
+    <option value="AppleTV+">AppleTV+</option>
+  </select>
+</div>
+
+<div class="form" id="formulario">
+  <select id="tipo">
+    <option value="series" selected>Serie</option>
+    <option value="peliculas">Película</option>
+  </select>
+  <select id="plataforma">
+    <option value="Netflix">Netflix</option>
+    <option value="Prime Video">Prime Video</option>
+    <option value="HBO Max">HBO Max</option>
+    <option value="Disney+">Disney+</option>
+    <option value="AppleTV+">AppleTV+</option>
+  </select>
+  <input type="text" id="titulo" placeholder="Título">
+  <button id="agregar">Agregar</button>
+</div>
+
+<table id="tablaSeries">
+  <thead><tr><th>Título</th><th>Plataforma</th><th>Acción</th></tr></thead>
+  <tbody id="cuerpoSeries"></tbody>
+</table>
+
+<table id="tablaPeliculas" style="display:none">
+  <thead><tr><th>Título</th><th>Plataforma</th><th>Acción</th></tr></thead>
+  <tbody id="cuerpoPeliculas"></tbody>
+</table>
+
+<div class="barra">
+  <button id="btnSeries" class="activo">Series</button>
+  <button id="btnPeliculas">Pelis</button>
+  <button id="btnAgregarForm">+</button>
+</div>
+
+<div id="modalSinopsis">
+  <div class="contenido">
+    <div id="textoSinopsis"></div>
+    <button id="cerrarModal">Cerrar</button>
+  </div>
+</div>
+
+<script>
+const tipoSelect = document.getElementById('tipo');
+const tituloInput = document.getElementById('titulo');
+const plataformaSelect = document.getElementById('plataforma');
+const agregarBtn = document.getElementById('agregar');
+const formulario = document.getElementById('formulario');
+const iconoTitulo = document.getElementById('iconoTitulo');
+const textoTitulo = document.getElementById('textoTitulo');
+const tablaSeries = document.getElementById('tablaSeries');
+const tablaPeliculas = document.getElementById('tablaPeliculas');
+const cuerpoSeries = document.getElementById('cuerpoSeries');
+const cuerpoPeliculas = document.getElementById('cuerpoPeliculas');
+const btnSeries = document.getElementById('btnSeries');
+const btnPeliculas = document.getElementById('btnPeliculas');
+const btnAgregarForm = document.getElementById('btnAgregarForm');
+const filtroPlataforma = document.getElementById('filtroPlataforma');
+const btnMenu = document.getElementById('btnMenu');
+const menuOpciones = document.getElementById('menuOpciones');
+const btnExportar = document.getElementById('btnExportar');
+const btnImportar = document.getElementById('btnImportar');
+const inputImportar = document.getElementById('inputImportar');
+const modalSinopsis = document.getElementById('modalSinopsis');
+const textoSinopsis = document.getElementById('textoSinopsis');
+const cerrarModal = document.getElementById('cerrarModal');
+
+let series = JSON.parse(localStorage.getItem('series')) || [];
+let peliculas = JSON.parse(localStorage.getItem('peliculas')) || [];
+
+function guardar() {
+  localStorage.setItem('series', JSON.stringify(series));
+  localStorage.setItem('peliculas', JSON.stringify(peliculas));
+}
+
+function render(lista, cuerpo, tipo) {
+  const filtro = filtroPlataforma.value;
+  cuerpo.innerHTML = '';
+  lista.filter(item => filtro==='todas'||item.plataforma===filtro)
+       .forEach((item,index)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${item.titulo}</td><td>${item.plataforma}</td><td><button class="delete-btn">🗑️</button></td>`;
+    tr.querySelector('.delete-btn').addEventListener('click', e=>{
+      e.stopPropagation();
+      lista.splice(index,1); guardar(); render(lista,cuerpo,tipo);
+    });
+    tr.addEventListener('click', ()=>buscarSinopsisTMDb(item.titulo,tipo));
+    cuerpo.appendChild(tr);
+  });
+}
+
+function mostrarLista(tipo){
+  if(tipo==='series'){
+    tablaSeries.style.display='table'; tablaPeliculas.style.display='none';
+    btnSeries.classList.add('activo'); btnPeliculas.classList.remove('activo');
+    iconoTitulo.textContent='📺'; textoTitulo.textContent=' Series';
+  } else {
+    tablaSeries.style.display='none'; tablaPeliculas.style.display='table';
+    btnPeliculas.classList.add('activo'); btnSeries.classList.remove('activo');
+    iconoTitulo.textContent='🎞️'; textoTitulo.textContent=' Películas';
+  }
+  aplicarFiltro();
+}
+
+function aplicarFiltro(){
+  if(tablaSeries.style.display==='table'){ render(series,cuerpoSeries,'series'); }
+  else { render(peliculas,cuerpoPeliculas,'peliculas'); }
+}
+
+function agregarElemento(){
+  const titulo = tituloInput.value.trim();
+  const plataforma = plataformaSelect.value;
+  const tipo = tipoSelect.value;
+  if(!titulo){ alert('Escribe un título'); return; }
+  const lista = tipo==='series'?series:peliculas;
+  if(!lista.some(e=>e.titulo.toLowerCase()===titulo.toLowerCase())){
+    lista.push({titulo,plataforma});
+  }
+  guardar(); aplicarFiltro(); mostrarLista(tipo);
+  tituloInput.value=''; formulario.classList.remove('visible');
+}
+
+agregarBtn.addEventListener('click', agregarElemento);
+tituloInput.addEventListener('keydown', e=>{ if(e.key==='Enter') agregarElemento(); });
+btnSeries.addEventListener('click', ()=>{ mostrarLista('series'); formulario.classList.remove('visible'); });
+btnPeliculas.addEventListener('click', ()=>{ mostrarLista('peliculas'); formulario.classList.remove('visible'); });
+btnAgregarForm.addEventListener('click', ()=>{ tipoSelect.value=tablaPeliculas.style.display==='table'?'peliculas':'series'; formulario.classList.toggle('visible'); tituloInput.focus(); });
+filtroPlataforma.addEventListener('change', aplicarFiltro);
+
+btnMenu.addEventListener('click', ()=>menuOpciones.classList.toggle('visible'));
+document.addEventListener('click', e=>{ if(!e.target.closest('.menu')&&!e.target.closest('#btnMenu')) menuOpciones.classList.remove('visible'); });
+
+btnExportar.addEventListener('click', ()=>{
+  let csv='Tipo,Título,Plataforma\n';
+  series.forEach(s=>csv+=`Serie,${s.titulo},${s.plataforma}\n`);
+  peliculas.forEach(p=>csv+=`Película,${p.titulo},${p.plataforma}\n`);
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='watchlist.csv'; a.click(); URL.revokeObjectURL(url); menuOpciones.classList.remove('visible');
+});
+btnImportar.addEventListener('click', ()=>inputImportar.click());
+inputImportar.addEventListener('change', e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=event=>{
+    const lines=event.target.result.split(/\r?\n/);
+    lines.slice(1).forEach(line=>{
+      const [tipo,titulo,plataforma]=line.split(',');
+      if(titulo && plataforma){
+        const cleanTitulo=titulo.trim(), cleanPlataforma=plataforma.trim();
+        if(tipo==='Serie'){ if(!series.some(s=>s.titulo.toLowerCase()===cleanTitulo.toLowerCase())) series.push({titulo:cleanTitulo,plataforma:cleanPlataforma}); }
+        else if(tipo==='Película'){ if(!peliculas.some(p=>p.titulo.toLowerCase()===cleanTitulo.toLowerCase())) peliculas.push({titulo:cleanTitulo,plataforma:cleanPlataforma}); }
+      }
+    });
+    guardar(); aplicarFiltro(); alert('Importación completada ✅');
+  };
+  reader.readAsText(file); menuOpciones.classList.remove('visible');
+});
+
+cerrarModal.addEventListener('click', ()=>modalSinopsis.style.display='none');
+modalSinopsis.addEventListener('click', e=>{ if(e.target===modalSinopsis) modalSinopsis.style.display='none'; });
+
+function buscarSinopsisTMDb(titulo,tipo){
+  const apiKey='a0080a31ac38a365707cbe63be481cb0'; // Reemplaza con tu clave TMDb
+  const tipoEndpoint = tipo==='series'?'tv':'movie';
+  const searchUrl = `https://api.themoviedb.org/3/search/${tipoEndpoint}?api_key=${apiKey}&query=${encodeURIComponent(titulo)}&language=es-ES`;
+  textoSinopsis.textContent='Cargando...';
+  modalSinopsis.style.display='flex';
+
+  fetch(searchUrl)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.results && data.results.length>0){
+        const item=data.results[0];
+        const detailUrl = `https://api.themoviedb.org/3/${tipoEndpoint}/${item.id}?api_key=${apiKey}&language=es-ES`;
+        return fetch(detailUrl);
+      } else throw new Error('No encontrado');
+    })
+    .then(r2=>r2.json())
+    .then(detail=>{
+      const posterUrl = detail.poster_path?`https://image.tmdb.org/t/p/w500${detail.poster_path}`:'';
+      textoSinopsis.innerHTML = `
+        <strong>${detail.name||detail.title}</strong> (${detail.first_air_date?.slice(0,4)||detail.release_date?.slice(0,4)})<br>
+        <em>${(detail.genres||[]).map(g=>g.name).join(', ')}</em><br>
+        ${posterUrl?`<img src="${posterUrl}" alt="Poster" style="width:100%;max-width:300px;margin-top:0.5rem;">`:''}
+        <p>${detail.overview||'Sin sinopsis disponible.'}</p>`;
+    })
+    .catch(()=>{ textoSinopsis.textContent='Sin sinopsis disponible.'; });
+}
+
+aplicarFiltro(); mostrarLista('series');
+</script>
 </body>
 </html>
 
