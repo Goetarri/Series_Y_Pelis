@@ -279,11 +279,13 @@ function guardar() {
   localStorage.setItem('peliculas', JSON.stringify(peliculas));
 }
 
-function render(lista, cuerpo, tipo) {
+function actualizarFiltro(lista) {
   const plataformas = Array.from(new Set(lista.map(i => i.plataforma))).sort();
   filtroPlataforma.innerHTML = '<option value="todas">Todas las plataformas</option>';
   plataformas.forEach(p => { filtroPlataforma.innerHTML += `<option value="${p}">${p}</option>`; });
+}
 
+function render(lista, cuerpo, tipo) {
   const filtro = filtroPlataforma.value;
   cuerpo.innerHTML = '';
   lista.filter(item => filtro==='todas'||item.plataforma===filtro)
@@ -304,7 +306,32 @@ function render(lista, cuerpo, tipo) {
         .then(data => {
           if(data.results && data.results.length > 0){
             const result = data.results[0];
-            document.getElementById('textoSinopsis').innerHTML = `<h3>${result.title || result.name}</h3><p>${result.overview}</p>`;
+            const poster = result.poster_path ? `<img src="https://image.tmdb.org/t/p/w300${result.poster_path}" style="max-width:100%; border-radius:8px; margin-bottom:1rem;">` : '';
+
+            if(tipo==='series'){
+              // Obtener número de temporadas con fetch adicional
+              fetch(`https://api.themoviedb.org/3/tv/${result.id}?api_key=${API_KEY}`)
+                .then(res2 => res2.json())
+                .then(detalle => {
+                  let infoExtra = '';
+                  if(result.first_air_date) infoExtra = ` (${result.first_air_date.slice(0,4)})`;
+                  if(detalle.number_of_seasons) infoExtra += ` - ${detalle.number_of_seasons} temporada${detalle.number_of_seasons>1?'s':''}`;
+                  document.getElementById('textoSinopsis').innerHTML = `
+                    ${poster}
+                    <h3>${result.name}${infoExtra}</h3>
+                    <p>${result.overview || 'Sin sinopsis disponible.'}</p>
+                  `;
+                });
+            } else {
+              let infoExtra = '';
+              if(result.release_date) infoExtra = ` (${result.release_date.slice(0,4)})`;
+              document.getElementById('textoSinopsis').innerHTML = `
+                ${poster}
+                <h3>${result.title}${infoExtra}</h3>
+                <p>${result.overview || 'Sin sinopsis disponible.'}</p>
+              `;
+            }
+
           } else {
             document.getElementById('textoSinopsis').innerHTML = `<p>No se encontró sinopsis.</p>`;
           }
@@ -330,11 +357,13 @@ function mostrarLista(tipo) {
     tablaSeries.style.display='table'; tablaPeliculas.style.display='none';
     btnSeries.classList.add('activo'); btnPeliculas.classList.remove('activo');
     iconoTitulo.textContent='📺'; textoTitulo.textContent=' Series';
+    actualizarFiltro(series);
     render(series,cuerpoSeries,'series');
   } else {
     tablaSeries.style.display='none'; tablaPeliculas.style.display='table';
     btnPeliculas.classList.add('activo'); btnSeries.classList.remove('activo');
     iconoTitulo.textContent='🎞️'; textoTitulo.textContent=' Películas';
+    actualizarFiltro(peliculas);
     render(peliculas,cuerpoPeliculas,'peliculas');
   }
 }
@@ -422,5 +451,5 @@ inputImportar.addEventListener('change', e => {
 mostrarLista('series');
 </script>
 </body>
-</html>
+</
 
