@@ -28,6 +28,7 @@ body {
   min-height: 100vh;
 }
 
+/* Encabezado */
 .header {
   display: flex;
   align-items: center;
@@ -46,6 +47,7 @@ h1 {
   gap: 0.5rem;
 }
 
+/* Menú desplegable */
 .menu-btn {
   position: absolute;
   right: 1rem;
@@ -79,6 +81,7 @@ h1 {
 }
 .menu button:hover { background: #f0f0f0; }
 
+/* Formulario */
 .form {
   background: #fff;
   padding: 1rem;
@@ -95,30 +98,87 @@ h1 {
   margin-bottom: 1rem;
 }
 .form.visible { max-height: 500px; opacity: 1; margin-bottom: 2rem; }
-.form input, .form select, .form button { font-size:1rem; padding:0.6rem; border-radius:8px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
-.form button { background: var(--color-primario); color:#fff; border:none; cursor:pointer; }
+.form input, .form select, .form button {
+  font-size:1rem; padding:0.6rem; border-radius:8px; border:1px solid #ccc;
+  width:100%; box-sizing:border-box;
+}
+.form button {
+  background: var(--color-primario); color:#fff; border:none; cursor:pointer;
+}
 .form button:hover { background:#005fcb; }
 
-.filtro { width:95%; max-width:600px; margin-bottom:0.5rem; }
-.filtro select { width:100%; padding:0.6rem; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+.filtro {
+  width:95%; max-width:600px; margin-bottom:0.5rem;
+}
+.filtro select {
+  width:100%; padding:0.6rem; border-radius:8px; border:1px solid #ccc; font-size:1rem;
+}
 
-table { width:95%; max-width:600px; border-collapse:collapse; margin-bottom:1rem; background:white; table-layout:fixed; }
+/* Tabla */
+table {
+  width:95%; max-width:600px; border-collapse:collapse; margin-bottom:1rem; background:white; table-layout:fixed;
+}
 thead { background: var(--color-primario); color:white; }
 th, td { padding:0.75rem; text-align:left; word-wrap:break-word; }
 tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
-.delete-btn { background:none; border:none; color:var(--color-borrar); font-size:1.1rem; cursor:pointer; padding:0.2rem 0.4rem; }
+.delete-btn {
+  background:none; border:none; color:var(--color-borrar);
+  font-size:1.1rem; cursor:pointer; padding:0.2rem 0.4rem;
+}
 .delete-btn:hover { opacity:0.7; }
 
-.barra { position:fixed; bottom:0; left:0; width:100%; display:flex; background: var(--barra-bg); height:3.5rem; box-shadow:0 -2px 6px rgba(0,0,0,0.1); }
-.barra button { margin:0; border-radius:0; background: var(--barra-inactivo); color:#fff; border:none; cursor:pointer; height:100%; font-size:1.1rem; font-weight:bold; }
-.barra button.activo { background: var(--barra-activo); color: var(--barra-texto); }
-#btnSeries { flex:0 0 43%; } #btnPeliculas { flex:0 0 43%; }
-#btnAgregarForm { flex:0 0 14%; background:var(--btn-agregar-color); color:#fff; font-weight:bold; font-size:1.5rem; }
+/* Barra inferior */
+.barra {
+  position:fixed; bottom:0; left:0; width:100%;
+  display:flex; background: var(--barra-bg);
+  height:3.5rem; box-shadow:0 -2px 6px rgba(0,0,0,0.1);
+}
+.barra button {
+  margin:0; border-radius:0; background: var(--barra-inactivo);
+  color:#fff; border:none; cursor:pointer; height:100%;
+  font-size:1.2rem; font-weight:bold;
+}
+.barra button.activo {
+  background: var(--barra-activo); color: var(--barra-texto);
+}
+#btnSeries { flex:0 0 43%; }
+#btnPeliculas { flex:0 0 43%; }
+#btnAgregarForm {
+  flex:0 0 14%; background:var(--btn-agregar-color);
+  color:#fff; font-weight:bold; font-size:1.5rem;
+}
 
-#modalSinopsis { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:2000; }
-#modalSinopsis .contenido { background:#fff; padding:1rem; border-radius:12px; max-width:90%; max-height:80%; overflow:auto; }
-#modalSinopsis button { margin-top:1rem; background:var(--color-primario); color:#fff; border:none; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; }
+/* Modal mejorado */
+#modalSinopsis {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.7); align-items:center; justify-content:center;
+  z-index:2000; animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+#modalSinopsis .contenido {
+  background:#fff; border-radius:16px; max-width:90%; width:400px;
+  max-height:80%; overflow:auto; padding:0; box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from {transform:translateY(20px); opacity:0;} to {transform:translateY(0); opacity:1;} }
+
+#modalSinopsis img {
+  width:100%; border-top-left-radius:16px; border-top-right-radius:16px;
+}
+#modalSinopsis .texto {
+  padding:1rem; text-align:center;
+}
+#modalSinopsis strong { font-size:1.2rem; }
+#modalSinopsis em { color:#666; font-size:0.9rem; }
+#modalSinopsis p { margin-top:0.5rem; line-height:1.4; }
+
+#cerrarModal {
+  background: var(--color-primario); color:#fff; border:none;
+  padding:0.5rem 1.2rem; border-radius:8px; cursor:pointer;
+  margin: 0.8rem auto 1rem auto; display:block; font-weight:bold;
+}
 </style>
 </head>
 <body>
@@ -178,12 +238,13 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
 <div id="modalSinopsis">
   <div class="contenido">
-    <div id="textoSinopsis"></div>
+    <div class="texto" id="textoSinopsis"></div>
     <button id="cerrarModal">Cerrar</button>
   </div>
 </div>
 
 <script>
+// Variables
 const tipoSelect = document.getElementById('tipo');
 const tituloInput = document.getElementById('titulo');
 const plataformaSelect = document.getElementById('plataforma');
@@ -211,11 +272,13 @@ const cerrarModal = document.getElementById('cerrarModal');
 let series = JSON.parse(localStorage.getItem('series')) || [];
 let peliculas = JSON.parse(localStorage.getItem('peliculas')) || [];
 
+// Guardar en localStorage
 function guardar() {
   localStorage.setItem('series', JSON.stringify(series));
   localStorage.setItem('peliculas', JSON.stringify(peliculas));
 }
 
+// Renderizar tablas
 function render(lista, cuerpo, tipo) {
   const filtro = filtroPlataforma.value;
   cuerpo.innerHTML = '';
@@ -232,6 +295,7 @@ function render(lista, cuerpo, tipo) {
   });
 }
 
+// Mostrar lista
 function mostrarLista(tipo){
   if(tipo==='series'){
     tablaSeries.style.display='table'; tablaPeliculas.style.display='none';
@@ -245,11 +309,13 @@ function mostrarLista(tipo){
   aplicarFiltro();
 }
 
+// Filtro
 function aplicarFiltro(){
   if(tablaSeries.style.display==='table'){ render(series,cuerpoSeries,'series'); }
   else { render(peliculas,cuerpoPeliculas,'peliculas'); }
 }
 
+// Agregar elemento
 function agregarElemento(){
   const titulo = tituloInput.value.trim();
   const plataforma = plataformaSelect.value;
@@ -263,6 +329,7 @@ function agregarElemento(){
   tituloInput.value=''; formulario.classList.remove('visible');
 }
 
+// Eventos principales
 agregarBtn.addEventListener('click', agregarElemento);
 tituloInput.addEventListener('keydown', e=>{ if(e.key==='Enter') agregarElemento(); });
 btnSeries.addEventListener('click', ()=>{ mostrarLista('series'); formulario.classList.remove('visible'); });
@@ -270,6 +337,7 @@ btnPeliculas.addEventListener('click', ()=>{ mostrarLista('peliculas'); formular
 btnAgregarForm.addEventListener('click', ()=>{ tipoSelect.value=tablaPeliculas.style.display==='table'?'peliculas':'series'; formulario.classList.toggle('visible'); tituloInput.focus(); });
 filtroPlataforma.addEventListener('change', aplicarFiltro);
 
+// Menú CSV
 btnMenu.addEventListener('click', ()=>menuOpciones.classList.toggle('visible'));
 document.addEventListener('click', e=>{ if(!e.target.closest('.menu')&&!e.target.closest('#btnMenu')) menuOpciones.classList.remove('visible'); });
 
@@ -278,9 +346,12 @@ btnExportar.addEventListener('click', ()=>{
   series.forEach(s=>csv+=`Serie,${s.titulo},${s.plataforma}\n`);
   peliculas.forEach(p=>csv+=`Película,${p.titulo},${p.plataforma}\n`);
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob); const a=document.createElement('a');
-  a.href=url; a.download='watchlist.csv'; a.click(); URL.revokeObjectURL(url); menuOpciones.classList.remove('visible');
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='watchlist.csv'; a.click(); URL.revokeObjectURL(url);
+  menuOpciones.classList.remove('visible');
 });
+
 btnImportar.addEventListener('click', ()=>inputImportar.click());
 inputImportar.addEventListener('change', e=>{
   const file=e.target.files[0]; if(!file) return;
@@ -297,17 +368,19 @@ inputImportar.addEventListener('change', e=>{
     });
     guardar(); aplicarFiltro(); alert('Importación completada ✅');
   };
-  reader.readAsText(file); menuOpciones.classList.remove('visible');
+  reader.readAsText(file);
+  menuOpciones.classList.remove('visible');
 });
 
+// Modal TMDb
 cerrarModal.addEventListener('click', ()=>modalSinopsis.style.display='none');
 modalSinopsis.addEventListener('click', e=>{ if(e.target===modalSinopsis) modalSinopsis.style.display='none'; });
 
 function buscarSinopsisTMDb(titulo,tipo){
-  const apiKey='a0080a31ac38a365707cbe63be481cb0'; // Reemplaza con tu clave TMDb
+  const apiKey='a0080a31ac38a365707cbe63be481cb0'; // Reemplaza con tu clave
   const tipoEndpoint = tipo==='series'?'tv':'movie';
   const searchUrl = `https://api.themoviedb.org/3/search/${tipoEndpoint}?api_key=${apiKey}&query=${encodeURIComponent(titulo)}&language=es-ES`;
-  textoSinopsis.textContent='Cargando...';
+  textoSinopsis.innerHTML='<p>Cargando...</p>';
   modalSinopsis.style.display='flex';
 
   fetch(searchUrl)
@@ -323,15 +396,19 @@ function buscarSinopsisTMDb(titulo,tipo){
     .then(detail=>{
       const posterUrl = detail.poster_path?`https://image.tmdb.org/t/p/w500${detail.poster_path}`:'';
       textoSinopsis.innerHTML = `
-        <strong>${detail.name||detail.title}</strong> (${detail.first_air_date?.slice(0,4)||detail.release_date?.slice(0,4)})<br>
-        <em>${(detail.genres||[]).map(g=>g.name).join(', ')}</em><br>
-        ${posterUrl?`<img src="${posterUrl}" alt="Poster" style="width:100%;max-width:300px;margin-top:0.5rem;">`:''}
-        <p>${detail.overview||'Sin sinopsis disponible.'}</p>`;
+        ${posterUrl?`<img src="${posterUrl}" alt="Poster">`:''}
+        <div>
+          <strong>${detail.name||detail.title}</strong><br>
+          <em>${(detail.genres||[]).map(g=>g.name).join(', ')}</em><br>
+          <p>${detail.overview||'Sin sinopsis disponible.'}</p>
+        </div>`;
     })
-    .catch(()=>{ textoSinopsis.textContent='Sin sinopsis disponible.'; });
+    .catch(()=>{ textoSinopsis.innerHTML='<p>Sin sinopsis disponible.</p>'; });
 }
 
-aplicarFiltro(); mostrarLista('series');
+// Inicialización
+aplicarFiltro();
+mostrarLista('series');
 </script>
 </body>
 </html>
