@@ -190,7 +190,17 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
 /* Tighten padding for the actions (last) column to make it compact on mobile */
 #tablaSeries td:last-child,
-#tablaPeliculas td:last-child,
+#tablaPeliculas td:last-child {
+  padding-left: 0.25rem;
+  padding-right: 0;
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Keep header cell centered */
 #tablaSeries th:last-child,
 #tablaPeliculas th:last-child {
   padding-left: 0.25rem;
