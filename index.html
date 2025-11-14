@@ -14,7 +14,7 @@
   --barra-activo: #0077ff;
   --barra-texto: #fff;
   --barra-inactivo: #aaa;
-  --btn-agregar-color: #28a745;
+  --btn-agregar-color: #112072;
 }
 
 body {
@@ -35,6 +35,13 @@ body {
   width: 95%;
   max-width: 600px;
   margin-bottom: 0.5rem;
+  background: var(--color-primario);
+  border-radius: 0px;
+  padding: 0.4rem 0.6rem;
+  position: sticky;
+  top: 0;
+  z-index: 3000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 h1 {
@@ -47,6 +54,9 @@ h1 {
   flex:1;
   justify-content: center;
 }
+
+/* Ensure header title is readable on blue background */
+.header h1 { color: #fff; }
 
 .menu-btn {
   background: none;
@@ -83,8 +93,8 @@ h1 {
   background: var(--fondo);
   color: var(--btn-agregar-color);
   font-weight: bold;
-  font-size: 1.5rem;
-  border: none;
+  font-size: 2.0rem;
+  border: 2px solid var(--btn-agregar-color);
   border-radius: 8px;
   cursor: pointer;
   padding: 0.2rem 0.6rem;
@@ -145,17 +155,23 @@ h1 {
 }
 
 table {
-  width:95%; max-width:600px; border-collapse:collapse; margin-bottom:1rem; background:white; table-layout:fixed;
+  width:95%; max-width:600px; border-collapse: separate; margin-bottom:1rem; background:white; table-layout:fixed;
+  border-radius: 10px;
+  overflow: hidden;
 }
 thead { background: var(--color-primario); color:white; }
+thead th:first-child { border-top-left-radius: 10px; }
+thead th:last-child { border-top-right-radius: 10px; }
 th, td { padding:0.75rem; text-align:left; word-wrap:break-word; }
 tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
-.delete-btn {
-  background:none; border:none; color:var(--color-borrar);
-  font-size:1.1rem; cursor:pointer; padding:0.2rem 0.4rem;
+.delete-btn, .edit-btn {
+  background:none; border:none; cursor:pointer; padding:0.1rem 0.25rem;
+  font-size:0.9rem; display:inline; margin:0 0.15rem;
 }
-.delete-btn:hover { opacity:0.7; }
+.edit-btn { color:#0077ff; }
+.delete-btn { color:var(--color-borrar); }
+.delete-btn:hover, .edit-btn:hover { opacity:0.7; }
 
 .barra {
   position:fixed; bottom:0; left:0; width:100%;
@@ -217,6 +233,7 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
     <option value="HBO Max">HBO Max</option>
     <option value="Disney+">Disney+</option>
     <option value="AppleTV+">AppleTV+</option>
+    <option value="AppleTV+">Movistar+</option>
   </select>
   <input type="text" id="titulo" placeholder="Título">
   <button id="agregar">Agregar</button>
@@ -230,12 +247,22 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 </div>
 
 <table id="tablaSeries">
-  <thead><tr><th>Título</th><th>Plataforma</th><th>Acción</th></tr></thead>
+  <colgroup>
+    <col style="width:55%">
+    <col style="width:30%">
+    <col style="width:15%">
+  </colgroup>
+  <thead><tr><th>Título</th><th>Plataforma</th><th style="text-align:center"></th></tr></thead>
   <tbody id="cuerpoSeries"></tbody>
 </table>
 
 <table id="tablaPeliculas" style="display:none">
-  <thead><tr><th>Título</th><th>Plataforma</th><th>Acción</th></tr></thead>
+  <colgroup>
+    <col style="width:55%">
+    <col style="width:30%">
+    <col style="width:15%">
+  </colgroup>
+  <thead><tr><th>Título</th><th>Plataforma</th><th style="text-align:center"></th></tr></thead>
   <tbody id="cuerpoPeliculas"></tbody>
 </table>
 
@@ -291,7 +318,19 @@ function render(lista, cuerpo, tipo) {
   lista.filter(item => filtro==='todas'||item.plataforma===filtro)
        .forEach((item,index)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${item.titulo}</td><td>${item.plataforma}</td><td><button class="delete-btn">🗑️</button></td>`;
+    tr.innerHTML=`<td>${item.titulo}</td><td>${item.plataforma}</td><td><button class="edit-btn">✏️</button><button class="delete-btn">🗑️</button></td>`;
+    
+    tr.querySelector('.edit-btn').addEventListener('click', e=>{
+      e.stopPropagation();
+      tipoSelect.value = tipo;
+      tituloInput.value = item.titulo;
+      plataformaSelect.value = item.plataforma;
+      formulario.classList.add('visible');
+      tituloInput.focus();
+      agregarBtn.textContent = 'Guardar Cambios';
+      agregarBtn.dataset.editIndex = index;
+      agregarBtn.dataset.editType = tipo;
+    });
     
     tr.querySelector('.delete-btn').addEventListener('click', e=>{
       e.stopPropagation();
@@ -373,9 +412,22 @@ function agregarElemento() {
   const plataforma = plataformaSelect.value;
   const tipo = tipoSelect.value;
   if(!titulo) return;
-  const lista = tipo==='series'?series:peliculas;
-  if(!lista.some(e=>e.titulo.toLowerCase()===titulo.toLowerCase())){
-    lista.push({titulo,plataforma});
+  
+  // Si estamos editando
+  if(agregarBtn.dataset.editIndex !== undefined){
+    const editIndex = parseInt(agregarBtn.dataset.editIndex);
+    const editType = agregarBtn.dataset.editType;
+    const lista = editType==='series'?series:peliculas;
+    lista[editIndex] = {titulo, plataforma};
+    delete agregarBtn.dataset.editIndex;
+    delete agregarBtn.dataset.editType;
+    agregarBtn.textContent = 'Agregar';
+  } else {
+    // Si estamos agregando
+    const lista = tipo==='series'?series:peliculas;
+    if(!lista.some(e=>e.titulo.toLowerCase()===titulo.toLowerCase())){
+      lista.push({titulo,plataforma});
+    }
   }
   guardar(); mostrarLista(tipo);
   tituloInput.value=''; formulario.classList.remove('visible');
@@ -399,6 +451,16 @@ document.getElementById('cerrarModal').addEventListener('click', ()=> {
   document.getElementById('modalSinopsis').style.display='none';
 });
 
+// Cerrar modal de sinopsis al hacer clic en el overlay (fuera del contenido)
+const modalSinopsis = document.getElementById('modalSinopsis');
+if (modalSinopsis) {
+  modalSinopsis.addEventListener('click', (e) => {
+    if (e.target === modalSinopsis) {
+      modalSinopsis.style.display = 'none';
+    }
+  });
+}
+
 // --- Menú CSV ---
 const btnMenu = document.getElementById('btnMenu');
 const menuOpciones = document.getElementById('menuOpciones');
@@ -407,6 +469,14 @@ const btnImportar = document.getElementById('btnImportar');
 const inputImportar = document.getElementById('inputImportar');
 
 btnMenu.addEventListener('click', () => menuOpciones.classList.toggle('visible'));
+
+// Cerrar el menú si el usuario hace clic fuera de él
+document.addEventListener('click', (e) => {
+  const target = e.target;
+  if (!menuOpciones.contains(target) && !btnMenu.contains(target)) {
+    menuOpciones.classList.remove('visible');
+  }
+});
 
 // Exportar ambas listas
 btnExportar.addEventListener('click', () => {
