@@ -176,12 +176,16 @@ th[data-sortable]:hover { background-color: rgba(0,0,0,0.1); }
 .sort-indicator { margin-left: 0.3rem; }
 tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
-.delete-btn, .edit-btn {
+.edit-btn {
   background:none; border:none; cursor:pointer; padding:0;
-  font-size:0.9rem; display:inline; margin:0 0.3rem;
+  font-size:0.9rem; display:inline; margin-right:0.3rem;
+  color:#0077ff;
 }
-.edit-btn { color:#0077ff; }
-.delete-btn { color:var(--color-borrar); }
+.delete-btn {
+  background:none; border:none; cursor:pointer; padding:0;
+  font-size:0.9rem; display:inline; margin-right:0;
+  color:var(--color-borrar);
+}
 .delete-btn:hover, .edit-btn:hover { opacity:0.7; }
 
 .barra {
@@ -260,8 +264,8 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
 <table id="tablaSeries">
   <colgroup>
-    <col style="width:40%">
-    <col style="width:35%">
+    <col style="width:45%">
+    <col style="width:33%">
     <col style="width:25%">
   </colgroup>
   <thead><tr><th data-sortable="titulo">Título <span class="sort-indicator"></span></th><th data-sortable="plataforma">Platform <span class="sort-indicator"></span></th><th style="text-align:center"></th></tr></thead>
@@ -270,7 +274,7 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
 <table id="tablaPeliculas" style="display:none">
   <colgroup>
-    <col style="width:40%">
+    <col style="width:45%">
     <col style="width:35%">
     <col style="width:25%">
   </colgroup>
