@@ -260,9 +260,9 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
 <table id="tablaSeries">
   <colgroup>
-    <col style="width:45%">
+    <col style="width:40%">
     <col style="width:35%">
-    <col style="width:20%">
+    <col style="width:25%">
   </colgroup>
   <thead><tr><th data-sortable="titulo">Título <span class="sort-indicator"></span></th><th data-sortable="plataforma">Platform <span class="sort-indicator"></span></th><th style="text-align:center"></th></tr></thead>
   <tbody id="cuerpoSeries"></tbody>
@@ -270,9 +270,9 @@ tbody tr:nth-child(odd) { background:#f9f9f9; cursor:pointer; }
 
 <table id="tablaPeliculas" style="display:none">
   <colgroup>
-    <col style="width:45%">
+    <col style="width:40%">
     <col style="width:35%">
-    <col style="width:20%">
+    <col style="width:25%">
   </colgroup>
   <thead><tr><th data-sortable="titulo">Título <span class="sort-indicator"></span></th><th data-sortable="plataforma">Platform <span class="sort-indicator"></span></th><th style="text-align:center"></th></tr></thead>
   <tbody id="cuerpoPeliculas"></tbody>
@@ -309,6 +309,10 @@ const filtroPlataforma = document.getElementById('filtroPlataforma');
 
 let series = JSON.parse(localStorage.getItem('series')) || [];
 let peliculas = JSON.parse(localStorage.getItem('peliculas')) || [];
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
 
 // Sorting state
 let sortState = { field: 'titulo', asc: true, type: 'series' };
@@ -579,9 +583,7 @@ tablaPeliculas.querySelectorAll('th[data-sortable]').forEach(th => {
     render(peliculas, cuerpoPeliculas, 'peliculas', tablaPeliculas);
   });
 });
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
-}
+
 </script>
 </body>
 </
